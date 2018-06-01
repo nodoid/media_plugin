@@ -8,6 +8,7 @@ using Android.OS;
 using Android.Support.V4.Media;
 using Android.Support.V4.Media.Session;
 using Plugin.MediaManager.Abstractions;
+using Javax.Microedition.Khronos.Opengles;
 
 namespace Plugin.MediaManager.MediaSession
 {
@@ -89,15 +90,18 @@ namespace Plugin.MediaManager.MediaSession
 
         internal void Release()
         {
-            try
+            if (mediaSessionCompat != null)
             {
-                mediaSessionCompat.Release();
-                mediaSessionCompat.Dispose();
-                mediaSessionCompat = null;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex);
+                try
+                {
+                    mediaSessionCompat.Release();
+                    mediaSessionCompat.Dispose();
+                    mediaSessionCompat = null;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex);
+                }
             }
         }
 
@@ -113,7 +117,7 @@ namespace Plugin.MediaManager.MediaSession
         /// <param name="position"></param>
         public void UpdatePlaybackState(int state, int position = 0, string errorMessage = "")
         {
-            if(CurrentSession == null && (_binder?.IsBinderAlive).GetValueOrDefault(false) && !string.IsNullOrWhiteSpace(_packageName))
+            if (CurrentSession == null && (_binder?.IsBinderAlive).GetValueOrDefault(false) && !string.IsNullOrWhiteSpace(_packageName))
                 InitMediaSession(_packageName, _binder);
 
             PlaybackStateCompat.Builder stateBuilder = new PlaybackStateCompat.Builder()
@@ -142,7 +146,7 @@ namespace Plugin.MediaManager.MediaSession
             //Used for backwards compatibility
             if ((Build.VERSION.SdkInt >= BuildVersionCodes.Lollipop)
                 && (CurrentSession?.RemoteControlClient == null
-                || (bool) !CurrentSession?.RemoteControlClient.Equals(typeof(RemoteControlClient)))) return;
+                || (bool)!CurrentSession?.RemoteControlClient.Equals(typeof(RemoteControlClient)))) return;
 
             RemoteControlClient remoteControlClient = (RemoteControlClient)CurrentSession?.RemoteControlClient;
 

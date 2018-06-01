@@ -1,17 +1,13 @@
 using System;
-using System.Runtime.InteropServices;
 using Android;
 using Android.App;
 using Android.Content;
-using Android.Content.PM;
 using Android.Graphics;
 using Android.Support.V4.App;
-using Android.Support.V4.Content;
 using Android.Support.V4.Media.Session;
 using Plugin.MediaManager.Abstractions;
 using Plugin.MediaManager.Abstractions.Enums;
-using Plugin.MediaManager.Abstractions.Implementations;
-using NotificationCompat = Android.Support.V7.App.NotificationCompat;
+using NotificationCompat = Android.Support.V4.App.NotificationCompat;
 
 namespace Plugin.MediaManager
 {
@@ -21,7 +17,7 @@ namespace Plugin.MediaManager
         private Intent _intent;
         private PendingIntent _pendingCancelIntent;
         private PendingIntent _pendingIntent;
-        private NotificationCompat.MediaStyle _notificationStyle = new NotificationCompat.MediaStyle();
+        //private NotificationCompat.MediaStyle _notificationStyle = new NotificationCompat.MediaStyle();
         private MediaSessionCompat.Token _sessionToken;
         private Context _appliactionContext;
         private NotificationCompat.Builder _builder;
@@ -54,13 +50,13 @@ namespace Plugin.MediaManager
         {
             var icon = (_appliactionContext.Resources?.GetIdentifier("xam_mediamanager_notify_ic", "drawable", _appliactionContext?.PackageName)).GetValueOrDefault(0);
 
-            _notificationStyle.SetMediaSession(_sessionToken);
+            /*_notificationStyle.SetMediaSession(_sessionToken);
             _notificationStyle.SetCancelButtonIntent(_pendingCancelIntent);
 
             _builder = new NotificationCompat.Builder(_appliactionContext)
             {
                 MStyle = _notificationStyle
-            };
+            };*/
             _builder.SetSmallIcon(icon != 0 ? icon : _appliactionContext.ApplicationInfo.Icon);
             _builder.SetContentIntent(_pendingIntent);
             _builder.SetOngoing(mediaIsPlaying);
@@ -68,8 +64,8 @@ namespace Plugin.MediaManager
 
             SetMetadata(mediaFile);
             AddActionButtons(mediaIsPlaying);
-            if (_builder.MActions.Count >= 3)
-                ((NotificationCompat.MediaStyle)(_builder.MStyle)).SetShowActionsInCompactView(0, 1, 2);
+            //if (_builder.MActions.Count >= 3)
+            //    ((NotificationCompat.MediaStyle)(_builder.MStyle)).SetShowActionsInCompactView(0, 1, 2);
 
             NotificationManagerCompat.From(_appliactionContext)
                 .Notify(MediaServiceBase.NotificationId, _builder.Build());

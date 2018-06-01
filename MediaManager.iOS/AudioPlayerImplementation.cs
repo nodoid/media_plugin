@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using AVFoundation;
 using CoreFoundation;
@@ -153,8 +152,11 @@ namespace Plugin.MediaManager
                 if (CurrentItem == null)
                     return;
 
-                if (Player.Rate != 0.0)
-                    Player.Pause();
+                if (this.PeriodicTimeObserverObject != null)
+                {
+                    if (Player.Rate != 1.0)
+                        Player.Pause();
+                }
 
                 CurrentItem.Seek(CMTime.FromSeconds(0d, 1));
 
@@ -171,8 +173,13 @@ namespace Plugin.MediaManager
                 if (CurrentItem == null)
                     return;
 
-                if (Player.Rate != 0.0)
-                    Player.Pause();
+                if (this.PeriodicTimeObserverObject != null)
+                {
+                    if (Player.Rate != 1.0)
+                    {
+                        Player.Pause();
+                    }
+                }
             });
         }
 
@@ -209,7 +216,8 @@ namespace Plugin.MediaManager
 
             _player = new AVPlayer();
 
-            if (_versionHelper.SupportsAutomaticWaitPlayerProperty) {
+            if (_versionHelper.SupportsAutomaticWaitPlayerProperty)
+            {
                 _player.AutomaticallyWaitsToMinimizeStalling = false;
             }
 
@@ -238,8 +246,9 @@ namespace Plugin.MediaManager
                 else
                 {
                     var totalDuration = TimeSpan.FromSeconds(CurrentItem.Duration.Seconds);
-                    var totalProgress = Position.TotalMilliseconds /
-                                        totalDuration.TotalMilliseconds;
+
+                    var totalProgress = totalDuration.TotalMilliseconds == 0D ? 0D : Position.TotalMilliseconds / totalDuration.TotalMilliseconds;
+
                     PlayingChanged?.Invoke(this, new PlayingChangedEventArgs(
                         !double.IsInfinity(totalProgress) ? totalProgress : 0,
                         Position,
@@ -305,7 +314,8 @@ namespace Plugin.MediaManager
             await Task.CompletedTask;
         }
 
-        private AVPlayerItem GetPlayerItem(NSUrl url) {
+        private AVPlayerItem GetPlayerItem(NSUrl url)
+        {
 
             AVAsset asset;
 
@@ -334,7 +344,7 @@ namespace Plugin.MediaManager
                 nativeHeaders.Add((NSString)header.Key, (NSString)header.Value);
             }
 
-            var nativeHeadersKey = (NSString) "AVURLAssetHTTPHeaderFieldsKey";
+            var nativeHeadersKey = (NSString)"AVURLAssetHTTPHeaderFieldsKey";
 
             var options = new AVUrlAssetOptions(NSDictionary.FromObjectAndKey(
                 nativeHeaders,
